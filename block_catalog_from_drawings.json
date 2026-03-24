@@ -1,0 +1,103 @@
+{
+  "sources": [
+    {
+      "file": "MOE UPDAE.dxf",
+      "insert_count": 555,
+      "unique_block_names": 84,
+      "blocks": [
+        {"name":"01- GR Furn$0$$AUDIT_BAD_BLOCK_RECORD1","count":370,"status":"unknown"},
+        {"name":"01- GR Furn$0$EQUIP TAG","count":32,"status":"tag"},
+        {"name":"JEN TIK","count":28,"status":"unknown"},
+        {"name":"01- GR Furn$0$230V","count":14,"status":"annotation"},
+        {"name":"01- GR Furn$0$A$C285064C4","count":8,"status":"anonymous"},
+        {"name":"01- GR Furn$0$POS-G-A","count":3,"status":"candidate_pos"},
+        {"name":"01- GR Furn$0$Tray","count":3,"status":"candidate_serving"},
+        {"name":"01- GR Furn$0$POS_G","count":2,"status":"candidate_pos"},
+        {"name":"01- GR Furn$0$D-FFV-810S","count":2,"status":"candidate_equipment"},
+        {"name":"01- GR Furn$0$D_AUSL","count":2,"status":"candidate_equipment"},
+        {"name":"01- GR Furn$0$2XWASSER","count":2,"status":"candidate_water"},
+        {"name":"01- GR Furn$0$D-Carbonator","count":2,"status":"candidate_beverage"},
+        {"name":"01- GR Furn$0$1XWASSER","count":2,"status":"candidate_water"},
+        {"name":"01- GR Furn$0$cash register","count":2,"status":"candidate_pos"},
+        {"name":"01- GR Furn$0$D-SINGLE TANK","count":1,"status":"candidate_sink"},
+        {"name":"01- GR Furn$0$D-Automan","count":1,"status":"candidate_equipment"},
+        {"name":"01- GR Furn$0$D-Broiler-Duke-FBB","count":1,"status":"confirmed_equipment"},
+        {"name":"01- GR Furn$0$D-Untergestell-Broiler-Duke-FBB","count":1,"status":"candidate_stand"},
+        {"name":"01- GR Furn$0$multiplex coca cola","count":1,"status":"candidate_beverage"},
+        {"name":"01- GR Furn$0$K20- Soda Dispenser_Drop-In","count":1,"status":"confirmed_equipment"},
+        {"name":"01- GR Furn$0$K45- Cup Disp","count":1,"status":"candidate_accessory"},
+        {"name":"01- GR Furn$0$UNDDER COUNTER ICE CUBE MACHINE SCOTSMAN","count":1,"status":"confirmed_equipment"},
+        {"name":"01- GR Furn$0$MINI I PREP TABLE NOGK","count":1,"status":"confirmed_equipment"},
+        {"name":"01- GR Furn$0$safe 1","count":1,"status":"candidate_support"},
+        {"name":"01- GR Furn$0$D-2T-L","count":1,"status":"candidate_sink"},
+        {"name":"01- GR Furn$0$1 COMPARTMENT SINK 02","count":1,"status":"confirmed_equipment"},
+        {"name":"01- GR Furn$0$Carpigiani 191PSP_TV_20221222_no dynamic Block_01","count":1,"status":"candidate_dessert"},
+        {"name":"01- GR Furn$0$JUICE MACHINE","count":1,"status":"confirmed_equipment"}
+      ]
+    },
+    {
+      "file": "c8c0aed4-8120-4661-9e94-2f9bb75d4e37.dxf",
+      "insert_count": 91,
+      "unique_block_names": 30,
+      "blocks": [
+        {"name":"POS_G","count":23,"status":"candidate_pos"},
+        {"name":"_ArchTick","count":20,"status":"annotation"},
+        {"name":"Grid Tag","count":6,"status":"annotation"},
+        {"name":"Door 1010","count":3,"status":"door"},
+        {"name":"COL","count":3,"status":"column"},
+        {"name":"SHOP","count":1,"status":"tenant_outline"},
+        {"name":"LVL","count":1,"status":"annotation"},
+        {"name":"Demise","count":1,"status":"boundary_candidate"},
+        {"name":"COLUMN","count":1,"status":"column"},
+        {"name":"DOOR SHEDULE","count":1,"status":"annotation"},
+        {"name":"veg sink","count":1,"status":"confirmed_equipment"}
+      ]
+    },
+    {
+      "file": "petrol_station_200sqm_drive-thru.dxf",
+      "insert_count": 0,
+      "unique_block_names": 0,
+      "blocks": []
+    }
+  ],
+  "canonical_mappings": {
+    "POS_COUNTER": [
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$POS-G-A","confidence":"medium"},
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$POS_G","confidence":"medium"},
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$cash register","confidence":"low"},
+      {"source_file":"c8c0aed4-8120-4661-9e94-2f9bb75d4e37.dxf","cad_block_name":"POS_G","confidence":"high"}
+    ],
+    "BROILER": [
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$D-Broiler-Duke-FBB","confidence":"high"},
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$D-Untergestell-Broiler-Duke-FBB","confidence":"medium"}
+    ],
+    "SODA_DISPENSER": [
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$K20- Soda Dispenser_Drop-In","confidence":"high"},
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$multiplex coca cola","confidence":"medium"},
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$D-Carbonator","confidence":"medium"}
+    ],
+    "ICE_MACHINE": [
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$UNDDER COUNTER ICE CUBE MACHINE SCOTSMAN","confidence":"high"}
+    ],
+    "PREP_TABLE": [
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$MINI I PREP TABLE NOGK","confidence":"high"}
+    ],
+    "SINK_1_COMP": [
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$1 COMPARTMENT SINK 02","confidence":"high"}
+    ],
+    "SINK_MISC": [
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$D-SINGLE TANK","confidence":"medium"},
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$D-2T-L","confidence":"medium"},
+      {"source_file":"c8c0aed4-8120-4661-9e94-2f9bb75d4e37.dxf","cad_block_name":"veg sink","confidence":"medium"}
+    ],
+    "JUICE_MACHINE": [
+      {"source_file":"MOE UPDAE.dxf","cad_block_name":"01- GR Furn$0$JUICE MACHINE","confidence":"high"}
+    ]
+  },
+  "notes": [
+    "This file is derived from actual INSERT names found in the uploaded DXFs.",
+    "No geometry dimensions were guessed here.",
+    "Anonymous and annotation blocks were left unmapped on purpose.",
+    "To get true block shapes, the next code step must read each BLOCK definition and compute its extents/bounding boxes."
+  ]
+}
