@@ -1,0 +1,114 @@
+brand: burger_king
+version: 0.1.0
+notes:
+  - Starter rule set for AI-assisted planning.
+  - Verify against approved franchisor manuals and local authority requirements before production use.
+
+site_type_defaults:
+  food_court:
+    zone_ratios:
+      kitchen: 0.42
+      dining: 0.43
+      support: 0.15
+    counter_type: front_counter
+    drive_thru: false
+    seat_area_sqm: 1.30
+  petrol_station:
+    zone_ratios:
+      kitchen: 0.43
+      dining: 0.42
+      support: 0.15
+    counter_type: front_counter_plus_drive_thru
+    drive_thru: true
+    seat_area_sqm: 1.50
+
+clearances:
+  main_aisle_min: 1.20
+  secondary_aisle_min: 0.90
+  equipment_front_working_min: 1.00
+  equipment_rear_service_min: 0.15
+  dining_pullout_min: 0.45
+  accessible_turning_reference: 1.50
+
+customer_flow:
+  sequence:
+    - entry
+    - queue
+    - order
+    - pickup
+    - beverage
+    - dining_or_exit
+
+kitchen_flow:
+  sequence:
+    - receiving
+    - cold_storage
+    - dry_storage
+    - prep
+    - broiler
+    - fryer
+    - assembly
+    - holding
+    - service
+
+required_zones:
+  - kitchen
+  - dining
+  - support
+  - counter
+  - wash
+  - cold_storage
+  - dry_storage
+
+required_equipment_minimum:
+  food_court:
+    - BROILER_DUKE_FFB
+    - FRYER_DOUBLE
+    - FOOD_WARMER_3X4
+    - WAREWASH_3_COMPARTMENT_SINK
+    - PREP_SINK_2_COMPARTMENT
+    - HANDWASH_SINK
+    - WALK_IN_CHILLER
+    - WALK_IN_FREEZER
+    - POS_COUNTER_2P
+  petrol_station:
+    - BROILER_DUKE_FFB
+    - FRYER_DOUBLE
+    - FOOD_WARMER_3X4
+    - FOOD_WARMER_2X4
+    - WAREWASH_3_COMPARTMENT_SINK
+    - PREP_SINK_2_COMPARTMENT
+    - HANDWASH_SINK
+    - WALK_IN_CHILLER
+    - WALK_IN_FREEZER
+    - POS_COUNTER_2P
+    - POS_COUNTER_DRIVE_THRU
+
+adjacency_preferences:
+  - [receiving, cold_storage]
+  - [receiving, dry_storage]
+  - [cold_storage, prep]
+  - [prep, broiler]
+  - [prep, fryer]
+  - [broiler, assembly]
+  - [fryer, assembly]
+  - [assembly, holding]
+  - [holding, counter]
+  - [counter, dining]
+
+seating_mix_defaults:
+  food_court:
+    two_seat_ratio: 0.35
+    four_seat_ratio: 0.50
+    booth_ratio: 0.15
+  petrol_station:
+    two_seat_ratio: 0.45
+    four_seat_ratio: 0.45
+    booth_ratio: 0.10
+
+validation_rules:
+  minimum_emergency_exits: 2
+  require_all_equipment_inside_boundary: true
+  require_zone_polygons_non_overlapping: true
+  require_primary_flow_order: true
+  require_counter_visible_from_customer_entry: true

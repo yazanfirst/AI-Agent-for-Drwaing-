@@ -1,0 +1,49 @@
+lod_100:
+  description: Concept zoning only
+  include:
+    - site_boundary
+    - zone_bubbles
+  exclude:
+    - exact_equipment_coordinates
+    - doors
+    - seating_layout
+    - dimensions
+
+lod_200:
+  description: Layout planning with key geometry
+  include:
+    - site_boundary
+    - obstacles
+    - zone_polygons
+    - primary_equipment_blocks
+    - seating_blocks
+    - primary_doors
+    - validation_report_basic
+  exclude:
+    - detailed_dimensions
+    - all_minor_accessories
+    - MEP_coordination
+
+lod_300:
+  description: Detailed fitout plan ready for engineering coordination
+  include:
+    - site_boundary
+    - obstacles
+    - walls
+    - zone_polygons
+    - full_equipment_coordinates
+    - seating_layout
+    - doors
+    - circulation_paths
+    - room_tags
+    - dimensions
+    - validation_report_detailed
+  exclude:
+    - full_MEP_system_design
+    - fabrication_shop_details
+
+naming_rules:
+  coordinate_system: meters
+  rotation_unit: degrees
+  polygon_winding: clockwise_or_consistent
+  unique_ids_required: true
