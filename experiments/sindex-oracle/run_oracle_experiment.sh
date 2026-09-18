@@ -37,7 +37,8 @@ echo "Using MKLROOT=$MKLROOT"
   bench.cpp \
   -L"$MKL_LIB" \
   -Wl,-rpath,"$MKL_LIB" \
-  -lmkl_rt -lpthread -lm -ldl \
+  -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group \
+  -lpthread -lm -ldl \
   -o "$BIN"
 
 COMMON=(
