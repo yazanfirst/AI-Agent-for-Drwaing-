@@ -1,0 +1,68 @@
+name: SIndex Oracle Experiment
+
+on:
+  push:
+    branches:
+      - sindex-oracle-experiment
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  oracle-experiment:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout experiment branch
+        uses: actions/checkout@v4
+
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake git wget gnupg python3
+
+      - name: Install Intel oneMKL
+        run: |
+          wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+            | gpg --dearmor \
+            | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg >/dev/null
+          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+            | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt-get update
+          sudo apt-get install -y intel-oneapi-mkl-devel
+
+      - name: Clone SIA
+        run: git clone --depth 1 https://github.com/casys-kaist/sia.git sia
+
+      - name: Apply oracle experiment patch
+        run: python3 experiments/sindex-oracle/apply_oracle_patch.py sia
+
+      - name: Build and run three experiment conditions
+        working-directory: sia
+        run: bash "$GITHUB_WORKSPACE/experiments/sindex-oracle/run_oracle_experiment.sh"
+
+      - name: Show result summary
+        if: always()
+        run: |
+          echo "### SIndex Oracle Experiment" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f sia/oracle_results/normal.txt ]; then
+            echo '```text' >> "$GITHUB_STEP_SUMMARY"
+            python3 experiments/sindex-oracle/compare_results.py \
+              sia/oracle_results/normal.txt \
+              sia/oracle_results/oracle_pause.txt \
+              sia/oracle_results/no_bg.txt \
+              | tee -a "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Experiment did not reach the results stage. Check the failing step." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload raw benchmark outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sindex-oracle-results
+          path: sia/oracle_results/
+          if-no-files-found: warn
