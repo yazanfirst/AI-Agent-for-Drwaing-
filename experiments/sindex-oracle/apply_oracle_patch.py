@@ -276,7 +276,7 @@ replace_once(
 
     all_latency_count += fg_params[i].latency_count;
 ''',
-    marker="table->set_bg_paused(false);"
+    marker="int rc = pthread_join(threads[i], &status);"
 )
 
 path = ROOT / "bench.cpp"
