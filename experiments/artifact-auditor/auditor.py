@@ -200,6 +200,14 @@ def audit_docs(root):
     # placeholders, build outputs, URLs, and general prose filenames.
     pat=re.compile(r"(?P<cmd>(?:sudo\s+)?(?:python3?\s+|bash\s+|sh\s+)?)(?P<path>\./[A-Za-z0-9_./-]+\.(?:sh|py))")
     for p in iter_files(root,{".md"}):
+        rel=p.relative_to(root)
+        rel_lower=str(rel).lower()
+        # Audit project-facing reproduction docs, not vendored dependency manuals.
+        project_doc=(len(rel.parts)==1 or any(
+            token in rel_lower for token in ("reproduce","reproduction","artifact","experiment")
+        ))
+        if not project_doc:
+            continue
         src=safe_read(p)
         for m in pat.finditer(src):
             rel_path=m.group("path")[2:]
