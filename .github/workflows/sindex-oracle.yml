@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - sindex-oracle-experiment
+    paths:
+      - experiments/sindex-oracle/**
+      - .github/workflows/sindex-oracle.yml
   workflow_dispatch:
 
 permissions:
