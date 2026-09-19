@@ -192,6 +192,29 @@ def audit_cpp(root):
                 ))
     return findings
 
+
+def audit_docs(root):
+    """Check executable/script paths written in reproduction documentation."""
+    findings=[]
+    # Only command-like relative paths ending in .sh/.py. This avoids
+    # placeholders, build outputs, URLs, and general prose filenames.
+    pat=re.compile(r"(?P<cmd>(?:sudo\\s+)?(?:python3?\\s+|bash\\s+|sh\\s+)?)(?P<path>\\./[A-Za-z0-9_./-]+\\.(?:sh|py))")
+    for p in iter_files(root,{".md"}):
+        src=safe_read(p)
+        for m in pat.finditer(src):
+            rel_path=m.group("path")[2:]
+            # strip punctuation occasionally adjacent in prose/code spans
+            rel_path=rel_path.rstrip(".,;:)")
+            target=root/rel_path
+            if not target.exists():
+                line=src.count("\\n",0,m.start())+1
+                findings.append(Finding(
+                    "DOCUMENTED_COMMAND_PATH_MISSING","HIGH",str(p.relative_to(root)),line,
+                    f"Documentation invokes '{m.group('path')}', but that relative .sh/.py path does not exist in the pinned repository.",
+                    m.group(0).strip()
+                ))
+    return findings
+
 def classify(root):
     readme=""
     for n in ("README.md","README","readme.md"):
@@ -211,7 +234,7 @@ def main():
     ap.add_argument("--json-out")
     args=ap.parse_args()
     root=Path(args.repo).resolve()
-    findings=audit_python(root)+audit_cpp(root)
+    findings=audit_python(root)+audit_cpp(root)+audit_docs(root)
     # de-duplicate
     uniq={}
     for f in findings:
