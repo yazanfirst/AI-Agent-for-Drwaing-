@@ -1,0 +1,62 @@
+name: Artifact Auditor BASIL Validation
+
+on:
+  push:
+    branches:
+      - sindex-oracle-experiment
+    paths:
+      - experiments/artifact-auditor/**
+      - .github/workflows/artifact-auditor-basil.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  basil:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone pinned BASIL artifact
+        run: |
+          git clone https://github.com/DKU-StarLab/BASIL.git target
+          git -C target checkout cc600dde8dd5019328d7a4a07dfc7dd51258648f
+
+      - name: Audit BASIL
+        run: |
+          python3 experiments/artifact-auditor/auditor.py target             --name "BASIL@cc600dd" --json-out basil.json | tee basil.txt
+
+      - name: Validate known documentation defects
+        run: |
+          python3 - <<'PY'
+          import json
+          d=json.load(open("basil.json"))
+          fs=[x for x in d["findings"] if x["rule"]=="DOCUMENTED_COMMAND_PATH_MISSING"]
+          print("doc_missing_count=",len(fs))
+          for x in fs:
+              print(x["path"],x["line"],x["evidence"])
+          expected_fragments={
+              "./scripts/download_data.sh",
+              "./scripts/reproduce/reproduce_perf.sh",
+              "./scripts/graphs/fig6_sampling_impact_srmi.py",
+              "./scripts/graphs/fig7_sampling_impact_spgm.py",
+              "./scripts/graphs/fig8_sampling_impact_srs.py",
+              "./scripts/graphs/fig9_sampling_impact_scht.py",
+              "./scripts/graphs/fig5_hardness.py",
+          }
+          evidence={x["evidence"].replace("python3 ","").replace("sudo ","").strip() for x in fs}
+          missing=[e for e in expected_fragments if e not in evidence]
+          if missing:
+              raise SystemExit("FAIL: missed known BASIL documentation paths: "+repr(missing))
+          print("BASIL_DOC_VALIDATION_GATE=PASS")
+          PY
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-auditor-basil
+          path: |
+            basil.json
+            basil.txt
