@@ -50,10 +50,10 @@ The prototype has two independently verified positive cases:
 - **SIA**: experiment sweep/CLI wiring defects.
 - **BASIL**: broken reproduction-document command paths.
 
-It has also been run against eight pinned control repositories with zero
+It has also been run against ten pinned control repositories with zero
 HIGH-confidence findings:
 
-ALEX, PGM-index, RadixSpline, SOSD, RMI, LearnedSecondaryIndex, LIPP, and DILI.
+ALEX, PGM-index, RadixSpline, SOSD, RMI, LearnedSecondaryIndex, LIPP, DILI, APEX, and CARMI.
 
 See `VALIDATION_REPORT.md` for exact commit hashes, findings, scope, and the
 current research gate.
