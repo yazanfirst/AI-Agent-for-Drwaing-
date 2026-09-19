@@ -1,0 +1,67 @@
+name: Artifact Auditor Expanded Validation
+
+on:
+  push:
+    branches:
+      - sindex-oracle-experiment
+    paths:
+      - experiments/artifact-auditor/**
+      - .github/workflows/artifact-auditor-expanded.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-expanded:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone pinned repositories
+        run: |
+          git clone https://github.com/learnedsystems/SOSD.git targets/sosd
+          git -C targets/sosd checkout f52f4cba01dfcd37f1574551fccef00198863b88
+
+          git clone https://github.com/learnedsystems/rmi.git targets/rmi
+          git -C targets/rmi checkout 6f03e69cfa73979d52c589c86ece0b6d37c69330
+
+          git clone https://github.com/learnedsystems/LearnedSecondaryIndex.git targets/lsi
+          git -C targets/lsi checkout 02da12bab5f48b8b9864d6bee6134d066abc0516
+
+          git clone https://github.com/Jiacheng-WU/lipp.git targets/lipp
+          git -C targets/lipp checkout fe6ca4954f00875482f9e4dd63b34dae2384d23b
+
+          git clone https://github.com/pfl-cs/DILI.git targets/dili
+          git -C targets/dili checkout babd1a2c53df841b55bc5867a6925ccc6fe88d87
+
+      - name: Run audits
+        run: |
+          for spec in             "sosd:SOSD@f52f4cb"             "rmi:RMI@6f03e69"             "lsi:LSI@02da12b"             "lipp:LIPP@fe6ca49"             "dili:DILI@babd1a2"; do
+            dir="${spec%%:*}"
+            name="${spec#*:}"
+            python3 experiments/artifact-auditor/auditor.py "targets/$dir"               --name "$name" --json-out "$dir.json" | tee "$dir.txt"
+          done
+
+      - name: Summary
+        run: |
+          python3 - <<'PY'
+          import json
+          names=["sosd","rmi","lsi","lipp","dili"]
+          print("=== EXPANDED VALIDATION ===")
+          total_high=0
+          for n in names:
+              d=json.load(open(n+".json"))
+              print(n, d["classification"], d["counts"])
+              total_high += d["counts"]["HIGH"]
+          print("expanded_total_high=",total_high)
+          PY
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-auditor-expanded-validation
+          path: |
+            *.json
+            *.txt
