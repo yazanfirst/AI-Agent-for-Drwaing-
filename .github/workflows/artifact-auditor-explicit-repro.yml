@@ -1,0 +1,50 @@
+name: Artifact Auditor Explicit Reproduction Set
+
+on:
+  push:
+    branches:
+      - sindex-oracle-experiment
+    paths:
+      - experiments/artifact-auditor/**
+      - .github/workflows/artifact-auditor-explicit-repro.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  explicit-repro:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone pinned artifacts
+        run: |
+          git clone https://github.com/baotonglu/apex.git targets/apex
+          git -C targets/apex checkout 5aee22aa6a6059e161aa2aca6e4080118aa246e9
+
+          git clone https://github.com/embryo-labs/CARMI.git targets/carmi
+          git -C targets/carmi checkout 2911ee504d084a0bc30bafe5f2732564a3fad893
+
+      - name: Audit artifacts
+        run: |
+          python3 experiments/artifact-auditor/auditor.py targets/apex             --name "APEX@5aee22a" --json-out apex.json | tee apex.txt
+          python3 experiments/artifact-auditor/auditor.py targets/carmi             --name "CARMI@2911ee5" --json-out carmi.json | tee carmi.txt
+
+      - name: Summary
+        run: |
+          python3 - <<'PY'
+          import json
+          for n in ("apex","carmi"):
+              d=json.load(open(n+".json"))
+              print(n,d["classification"],d["counts"])
+          PY
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-auditor-explicit-repro
+          path: |
+            *.json
+            *.txt
