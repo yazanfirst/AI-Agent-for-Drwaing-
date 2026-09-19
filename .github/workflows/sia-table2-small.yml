@@ -1,0 +1,75 @@
+name: SIA Table 2 Small Reproduction
+
+on:
+  push:
+    branches:
+      - sindex-oracle-experiment
+    paths:
+      - experiments/table2-small/**
+      - .github/workflows/sia-table2-small.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  table2-small:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake git wget gnupg python3
+          wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+            | gpg --dearmor \
+            | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg >/dev/null
+          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+            | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt-get update
+          sudo apt-get install -y intel-oneapi-mkl-devel
+
+      - name: Clone SIA
+        run: git clone --depth 1 https://github.com/casys-kaist/sia.git sia
+
+      - name: Apply artifact reproducibility fixes
+        run: python3 experiments/sia-artifact-audit/apply_artifact_fixes.py sia
+
+      - name: Expose oneMKL at legacy SIA paths
+        run: |
+          sudo mkdir -p /opt/intel/mkl/lib
+          sudo ln -sfn /opt/intel/oneapi/mkl/latest/include /opt/intel/mkl/include
+          sudo ln -sfn /opt/intel/oneapi/mkl/latest/lib /opt/intel/mkl/lib/intel64
+
+      - name: Configure
+        working-directory: sia
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build ideal uniform microbenchmark
+        working-directory: sia
+        run: cmake --build build --target micro_ideal_UNIFORM_DIST -j2
+
+      - name: Run small Table 2 reproduction
+        working-directory: sia
+        run: bash "$GITHUB_WORKSPACE/experiments/table2-small/run_table2_small.sh"
+
+      - name: Summarize
+        if: always()
+        run: |
+          echo "### SIA Table 2 Small Reproduction" >> "$GITHUB_STEP_SUMMARY"
+          if [ -d sia/table2_small_results ]; then
+            echo '```text' >> "$GITHUB_STEP_SUMMARY"
+            python3 experiments/table2-small/compare_table2_small.py sia/table2_small_results \
+              | tee -a "$GITHUB_STEP_SUMMARY" || true
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sia-table2-small-results
+          path: sia/table2_small_results/
+          if-no-files-found: warn
