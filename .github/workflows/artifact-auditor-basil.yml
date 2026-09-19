@@ -46,8 +46,8 @@ jobs:
               "./scripts/graphs/fig9_sampling_impact_scht.py",
               "./scripts/graphs/fig5_hardness.py",
           }
-          evidence={x["evidence"].replace("python3 ","").replace("sudo ","").strip() for x in fs}
-          missing=[e for e in expected_fragments if e not in evidence]
+          messages="\\n".join(x["message"] for x in fs)
+          missing=[e for e in expected_fragments if e not in messages]
           if missing:
               raise SystemExit("FAIL: missed known BASIL documentation paths: "+repr(missing))
           print("BASIL_DOC_VALIDATION_GATE=PASS")
