@@ -194,33 +194,72 @@ def audit_cpp(root):
 
 
 def audit_docs(root):
-    """Check executable/script paths written in reproduction documentation."""
+    """Check executable/script paths written in project-facing reproduction docs.
+
+    Fenced shell blocks track simple 'cd <relative-path>' commands so that
+    './script.sh' is resolved relative to the documented working directory.
+    """
     findings=[]
-    # Only command-like relative paths ending in .sh/.py. This avoids
-    # placeholders, build outputs, URLs, and general prose filenames.
-    pat=re.compile(r"(?P<cmd>(?:sudo\s+)?(?:python3?\s+|bash\s+|sh\s+)?)(?P<path>\./[A-Za-z0-9_./-]+\.(?:sh|py))")
+    cmd_pat=re.compile(r"(?P<cmd>(?:sudo\s+)?(?:python3?\s+|bash\s+|sh\s+)?)(?P<path>\./[A-Za-z0-9_./-]+\.(?:sh|py))")
+    cd_pat=re.compile(r"^(?:\$\s*)?cd\s+(?P<path>[A-Za-z0-9_./-]+)\s*$")
+
     for p in iter_files(root,{".md"}):
         rel=p.relative_to(root)
         rel_lower=str(rel).lower()
-        # Audit project-facing reproduction docs, not vendored dependency manuals.
         project_doc=(len(rel.parts)==1 or any(
             token in rel_lower for token in ("reproduce","reproduction","artifact","experiment")
         ))
         if not project_doc:
             continue
+
         src=safe_read(p)
-        for m in pat.finditer(src):
-            rel_path=m.group("path")[2:]
-            # strip punctuation occasionally adjacent in prose/code spans
-            rel_path=rel_path.rstrip(".,;:)")
-            target=root/rel_path
-            if not target.exists():
-                line=src.count("\n",0,m.start())+1
-                findings.append(Finding(
-                    "DOCUMENTED_COMMAND_PATH_MISSING","HIGH",str(p.relative_to(root)),line,
-                    f"Documentation invokes '{m.group('path')}', but that relative .sh/.py path does not exist in the pinned repository.",
-                    m.group(0).strip()
-                ))
+        lines=src.splitlines()
+        in_fence=False
+        cwd=root
+
+        for lineno,line in enumerate(lines,1):
+            stripped=line.strip()
+
+            if stripped.startswith("```"):
+                if not in_fence:
+                    in_fence=True
+                    cwd=root
+                else:
+                    in_fence=False
+                    cwd=root
+                continue
+
+            check_base=root
+            command_text=line
+
+            if in_fence:
+                shell_line=stripped
+                if shell_line.startswith("$ "):
+                    shell_line=shell_line[2:].strip()
+
+                mcd=cd_pat.match(shell_line)
+                if mcd:
+                    cd_arg=mcd.group("path")
+                    candidate=(cwd/cd_arg).resolve()
+                    try:
+                        candidate.relative_to(root.resolve())
+                        cwd=candidate
+                    except ValueError:
+                        pass
+                    continue
+
+                check_base=cwd
+                command_text=shell_line
+
+            for m in cmd_pat.finditer(command_text):
+                rel_path=m.group("path")[2:].rstrip(".,;:")
+                target=(check_base/rel_path)
+                if not target.exists():
+                    findings.append(Finding(
+                        "DOCUMENTED_COMMAND_PATH_MISSING","HIGH",str(rel),lineno,
+                        f"Documentation invokes '{m.group('path')}', but that .sh/.py path does not exist relative to the documented working directory.",
+                        m.group(0).strip()
+                    ))
     return findings
 
 def classify(root):
