@@ -50,6 +50,15 @@ jobs:
           missing=[e for e in expected_fragments if e not in messages]
           if missing:
               raise SystemExit("FAIL: missed known BASIL documentation paths: "+repr(missing))
+          unexpected=[]
+          for x in fs:
+              if not any(e in x["message"] for e in expected_fragments):
+                  unexpected.append((x["path"],x["line"],x["message"]))
+          if unexpected:
+              raise SystemExit("FAIL: unexpected HIGH documentation findings: "+repr(unexpected))
+          unique_found={e for e in expected_fragments if e in messages}
+          if len(unique_found) != 7:
+              raise SystemExit("FAIL: expected exactly 7 unique broken documented paths")
           print("BASIL_DOC_VALIDATION_GATE=PASS")
           PY
 
