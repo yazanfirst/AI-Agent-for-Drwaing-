@@ -1,0 +1,104 @@
+name: Artifact Auditor Validation
+
+on:
+  push:
+    branches:
+      - sindex-oracle-experiment
+    paths:
+      - experiments/artifact-auditor/**
+      - .github/workflows/artifact-auditor-validation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone pinned validation repositories
+        run: |
+          git clone https://github.com/casys-kaist/sia.git targets/sia
+          git -C targets/sia checkout 7645a9c644db55d677c814687db8bae87f719b9d
+
+          git clone https://github.com/microsoft/ALEX.git targets/alex
+          git -C targets/alex checkout 4370da6aa8b509fdc9b0d2c49faa0624b0078589
+
+          git clone https://github.com/gvinciguerra/PGM-index.git targets/pgm
+          git -C targets/pgm checkout c6fcf3d34e55eb0061b01e2f49dfcbdb711f1407
+
+          git clone https://github.com/learnedsystems/RadixSpline.git targets/radixspline
+          git -C targets/radixspline checkout ab96aa59d429e7423beba2350bdcdf88952df282
+
+      - name: Audit SIA
+        run: |
+          python3 experiments/artifact-auditor/auditor.py targets/sia             --name "SIA@7645a9c"             --json-out sia.json | tee sia.txt
+
+      - name: Audit ALEX
+        run: |
+          python3 experiments/artifact-auditor/auditor.py targets/alex             --name "ALEX@4370da6"             --json-out alex.json | tee alex.txt
+
+      - name: Audit PGM-index
+        run: |
+          python3 experiments/artifact-auditor/auditor.py targets/pgm             --name "PGM-index@c6fcf3d"             --json-out pgm.json | tee pgm.txt
+
+      - name: Audit RadixSpline
+        run: |
+          python3 experiments/artifact-auditor/auditor.py targets/radixspline             --name "RadixSpline@ab96aa5"             --json-out radixspline.json | tee radixspline.txt
+
+      - name: Validate prototype precision
+        run: |
+          python3 - <<'PY'
+          import json
+          names=["sia","alex","pgm","radixspline"]
+          r={n:json.load(open(n+".json")) for n in names}
+
+          print("=== VALIDATION SUMMARY ===")
+          for n in names:
+              print(n, r[n]["classification"], r[n]["counts"])
+
+          sia_high=r["sia"]["counts"]["HIGH"]
+          control_high=sum(r[n]["counts"]["HIGH"] for n in ("alex","pgm","radixspline"))
+
+          required={
+              "SWEEP_VALUE_NOT_PROPAGATED",
+              "CLI_CASE_FALLTHROUGH_TO_DEFAULT",
+          }
+          sia_rules={x["rule"] for x in r["sia"]["findings"] if x["confidence"]=="HIGH"}
+
+          print("sia_high=",sia_high)
+          print("control_high=",control_high)
+          print("sia_high_rules=",sorted(sia_rules))
+          print("required_high_rules_present=",required.issubset(sia_rules))
+
+          if not required.issubset(sia_rules):
+              raise SystemExit("FAIL: auditor missed known SIA high-confidence defect classes")
+          if control_high != 0:
+              raise SystemExit("FAIL: auditor produced HIGH false positives in controls")
+          print("VALIDATION_GATE=PASS")
+          PY
+
+      - name: Build summary
+        if: always()
+        run: |
+          echo "### Artifact Auditor Validation" >> "$GITHUB_STEP_SUMMARY"
+          for f in sia.txt alex.txt pgm.txt radixspline.txt; do
+            if [ -f "$f" ]; then
+              echo "#### $f" >> "$GITHUB_STEP_SUMMARY"
+              echo '```text' >> "$GITHUB_STEP_SUMMARY"
+              cat "$f" >> "$GITHUB_STEP_SUMMARY"
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-auditor-validation
+          path: |
+            *.json
+            *.txt
