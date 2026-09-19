@@ -21,14 +21,17 @@ def replace_once(rel, old, new, marker=None):
 
 replace_once(
     "original/sindex_impl.h",
-    '''#include "../lock.h"
-#include "mkl.h"
+    '''#include "sindex_root_impl.h"
+
+#if !defined(SINDEX_IMPL_H)
 ''',
-    '''#include "../lock.h"
-#include "mkl.h"
+    '''#include "sindex_root_impl.h"
+
 #include <cstdlib>
 #include <fcntl.h>
 #include <sys/file.h>
+
+#if !defined(SINDEX_IMPL_H)
 ''',
     marker="#include <sys/file.h>"
 )
