@@ -198,7 +198,7 @@ def audit_docs(root):
     findings=[]
     # Only command-like relative paths ending in .sh/.py. This avoids
     # placeholders, build outputs, URLs, and general prose filenames.
-    pat=re.compile(r"(?P<cmd>(?:sudo\\s+)?(?:python3?\\s+|bash\\s+|sh\\s+)?)(?P<path>\\./[A-Za-z0-9_./-]+\\.(?:sh|py))")
+    pat=re.compile(r"(?P<cmd>(?:sudo\s+)?(?:python3?\s+|bash\s+|sh\s+)?)(?P<path>\./[A-Za-z0-9_./-]+\.(?:sh|py))")
     for p in iter_files(root,{".md"}):
         src=safe_read(p)
         for m in pat.finditer(src):
@@ -207,7 +207,7 @@ def audit_docs(root):
             rel_path=rel_path.rstrip(".,;:)")
             target=root/rel_path
             if not target.exists():
-                line=src.count("\\n",0,m.start())+1
+                line=src.count("\n",0,m.start())+1
                 findings.append(Finding(
                     "DOCUMENTED_COMMAND_PATH_MISSING","HIGH",str(p.relative_to(root)),line,
                     f"Documentation invokes '{m.group('path')}', but that relative .sh/.py path does not exist in the pinned repository.",
