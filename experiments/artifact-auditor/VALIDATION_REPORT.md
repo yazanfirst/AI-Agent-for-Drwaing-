@@ -122,6 +122,8 @@ Pinned snapshots with zero HIGH findings:
 | LearnedSecondaryIndex | 02da12bab5f48b8b9864d6bee6134d066abc0516 | 0 |
 | LIPP | fe6ca4954f00875482f9e4dd63b34dae2384d23b | 0 |
 | DILI | babd1a2c53df841b55bc5867a6925ccc6fe88d87 | 0 |
+| APEX | 5aee22aa6a6059e161aa2aca6e4080118aa246e9 | 0 |
+| CARMI | 2911ee504d084a0bc30bafe5f2732564a3fad893 | 0 |
 
 This is an initial precision check, not a statistical estimate of false
 positive rate.
@@ -137,7 +139,7 @@ artifacts:
 - **reproduction documentation/path drift** in BASIL.
 
 At the same time, the HIGH-confidence rules produced zero HIGH findings across
-eight control repositories in the pinned validation set.
+ten control repositories in the pinned validation set.
 
 ## What this does NOT demonstrate
 
