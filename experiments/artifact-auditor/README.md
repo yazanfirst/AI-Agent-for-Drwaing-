@@ -41,3 +41,34 @@ artifacts merely because they contain benchmark code.
 The next criterion is precision: if the prototype flags high-confidence
 defects in controls without a real wiring problem, the rule must be narrowed
 before expanding the dataset.
+
+
+## Current validation status
+
+The prototype has two independently verified positive cases:
+
+- **SIA**: experiment sweep/CLI wiring defects.
+- **BASIL**: broken reproduction-document command paths.
+
+It has also been run against eight pinned control repositories with zero
+HIGH-confidence findings:
+
+ALEX, PGM-index, RadixSpline, SOSD, RMI, LearnedSecondaryIndex, LIPP, and DILI.
+
+See `VALIDATION_REPORT.md` for exact commit hashes, findings, scope, and the
+current research gate.
+
+## Documentation consistency rule
+
+The auditor now checks project-facing README/reproduction/artifact/experiment
+Markdown files for relative `.sh` and `.py` commands that do not exist.
+It tracks simple working-directory changes inside shell code blocks, including:
+
+```bash
+git clone https://github.com/org/repo.git
+cd repo
+./scripts/run.sh
+```
+
+This was added only after BASIL exposed documentation drift, and it was
+revalidated against the existing control set to avoid known false positives.
