@@ -32,28 +32,25 @@ replace_once(
 """
 )
 
-replace_once(
-    "scripts/lazy_delete.py",
-    """                        --table-size={DATASET_SIZE}         \
-                        > ../results/lazy_delete_{delete_ratio}_{training_time}_{i}.txt")
-""",
-    """                        --table-size={DATASET_SIZE}         \
-                        --ideal-training-time={training_time}     \
-                        > ../results/lazy_delete_{delete_ratio}_{training_time}_{i}.txt")
-"""
-)
+p=ROOT/"scripts/lazy_delete.py"
+s=p.read_text()
+needle="                        --table-size={DATASET_SIZE}         " + "\\" + "\n"
+if s.count(needle) != 1:
+    raise SystemExit(f"scripts/lazy_delete.py: expected one table-size command line, found {s.count(needle)}")
+insert=needle + "                        --ideal-training-time={training_time}     " + "\\" + "\n"
+p.write_text(s.replace(needle, insert, 1))
+print("[fixed] scripts/lazy_delete.py")
 
-replace_once(
-    "scripts/node_size.py",
-    """                                    --cluster-number={cluster}  \
-                                    > ../results/node_size_{index}_{cluster}_{node_accuracy}_{i}.txt')
-""",
-    """                                    --cluster-number={cluster}                  \
-                                    --sindex-group-err-bound={node_accuracy}    \
-                                    --sindex-root-err-bound={node_accuracy}     \
-                                    > ../results/node_size_{index}_{cluster}_{node_accuracy}_{i}.txt')
-"""
-)
+p=ROOT/"scripts/node_size.py"
+s=p.read_text()
+needle="                                    --cluster-number={cluster}  " + "\\" + "\n"
+if s.count(needle) != 1:
+    raise SystemExit(f"scripts/node_size.py: expected one Twitter cluster command line, found {s.count(needle)}")
+insert=(needle
+        + "                                    --sindex-group-err-bound={node_accuracy}    " + "\\" + "\n"
+        + "                                    --sindex-root-err-bound={node_accuracy}     " + "\\" + "\n")
+p.write_text(s.replace(needle, insert, 1))
+print("[fixed] scripts/node_size.py")
 
 p=ROOT/"CMakeLists.txt"
 s=p.read_text()
