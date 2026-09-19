@@ -216,6 +216,7 @@ def audit_docs(root):
         lines=src.splitlines()
         in_fence=False
         cwd=root
+        cloned_dirs=set()
 
         for lineno,line in enumerate(lines,1):
             stripped=line.strip()
@@ -224,9 +225,11 @@ def audit_docs(root):
                 if not in_fence:
                     in_fence=True
                     cwd=root
+                    cloned_dirs=set()
                 else:
                     in_fence=False
                     cwd=root
+                    cloned_dirs=set()
                 continue
 
             check_base=root
@@ -237,9 +240,23 @@ def audit_docs(root):
                 if shell_line.startswith("$ "):
                     shell_line=shell_line[2:].strip()
 
+                # Map "git clone .../Repo.git" followed by "cd Repo" to the
+                # audited repository root, since our checkout already *is*
+                # that cloned directory.
+                mclone=re.match(r"git\\s+clone\\s+\\S+/([^/\\s]+?)(?:\\.git)?(?:\\s+([A-Za-z0-9_.-]+))?\\s*$",shell_line)
+                if mclone:
+                    repo_dir=mclone.group(2) or mclone.group(1)
+                    if repo_dir.endswith(".git"):
+                        repo_dir=repo_dir[:-4]
+                    cloned_dirs.add(repo_dir)
+                    continue
+
                 mcd=cd_pat.match(shell_line)
                 if mcd:
                     cd_arg=mcd.group("path")
+                    if cwd==root and cd_arg in cloned_dirs:
+                        cwd=root
+                        continue
                     candidate=(cwd/cd_arg).resolve()
                     try:
                         candidate.relative_to(root.resolve())
