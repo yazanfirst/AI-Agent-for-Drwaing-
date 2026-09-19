@@ -243,7 +243,7 @@ def audit_docs(root):
                 # Map "git clone .../Repo.git" followed by "cd Repo" to the
                 # audited repository root, since our checkout already *is*
                 # that cloned directory.
-                mclone=re.match(r"git\\s+clone\\s+\\S+/([^/\\s]+?)(?:\\.git)?(?:\\s+([A-Za-z0-9_.-]+))?\\s*$",shell_line)
+                mclone=re.match(r"git\s+clone\s+\S+/([^/\s]+?)(?:\.git)?(?:\s+([A-Za-z0-9_.-]+))?\s*$",shell_line)
                 if mclone:
                     repo_dir=mclone.group(2) or mclone.group(1)
                     if repo_dir.endswith(".git"):
